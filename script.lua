@@ -1,4 +1,11 @@
--- Códigos
+local Players = game:GetService("Players")
+local InsertService = game:GetService("InsertService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Códigos para resgatar
 local codes = {
     "THANKSFOR30KLIKES",
     "THANKSFOR20KLIKES",
@@ -10,107 +17,108 @@ local codes = {
     "15KCCU",
     "RELEASE",
     "THANKSFOR20K",
-    "TRAILER"
+    "TRAILER",
 }
 
--- RemoteFunction alvo
-local remote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("RemoteFunction")
+-- Cria ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "CodesUI"
+screenGui.Parent = playerGui
 
--- Criar UI
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "SevenZZ_UI"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+-- Cria Frame principal (UI)
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 300, 0, 220)
+frame.Position = UDim2.new(0.5, -150, 0.5, -110)
+frame.BackgroundColor3 = Color3.new(1, 1, 1)
+frame.BackgroundTransparency = 1 -- transparente para mostrar ViewportFrame
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+frame.Parent = screenGui
 
-local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 300, 0, 200)
-Frame.Position = UDim2.new(0.5, -150, 0.5, -100)
-Frame.BackgroundColor3 = Color3.new(1, 1, 1) -- branco (ou qualquer cor que combine)
-Frame.BackgroundTransparency = 1 -- deixa transparente para mostrar a imagem
-Frame.BorderSizePixel = 0
-Frame.Name = "MainFrame"
-Frame.Active = true
-Frame.Draggable = true
-Frame.Parent = ScreenGui
+-- ViewportFrame para mostrar o modelo 3D
+local viewport = Instance.new("ViewportFrame")
+viewport.Size = UDim2.new(1, 0, 1, 0)
+viewport.BackgroundTransparency = 1
+viewport.Parent = frame
 
--- Fundo com imagem
-local Background = Instance.new("ImageLabel")
-Background.Size = UDim2.new(1, 0, 1, 0)
-Background.Position = UDim2.new(0, 0, 0, 0)
-Background.BackgroundTransparency = 1
-Background.Image = "rbxassetid://111116013305832"
-Background.ZIndex = 0
-Background.Parent = Frame
-
--- Título
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 30)
-Title.BackgroundTransparency = 1
-Title.Text = "7zz gostoso"
-Title.Font = Enum.Font.FredokaOne
-Title.TextColor3 = Color3.new(1, 1, 1)
-Title.TextSize = 24
-Title.ZIndex = 1
-Title.Parent = Frame
-
--- Botão de fechar
-local CloseButton = Instance.new("TextButton")
-CloseButton.Size = UDim2.new(0, 30, 0, 30)
-CloseButton.Position = UDim2.new(1, -30, 0, 0)
-CloseButton.BackgroundColor3 = Color3.fromRGB(255, 150, 200)
-CloseButton.Text = "X"
-CloseButton.Font = Enum.Font.FredokaOne
-CloseButton.TextSize = 20
-CloseButton.TextColor3 = Color3.new(1, 1, 1)
-CloseButton.ZIndex = 1
-CloseButton.Parent = Frame
-
-CloseButton.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
+-- Carrega o modelo 3D "Cachorro 200 reais"
+local success, model = pcall(function()
+    return InsertService:LoadAsset(10333301952)
 end)
 
--- Botão de usar códigos
-local RedeemButton = Instance.new("TextButton")
-RedeemButton.Size = UDim2.new(0.8, 0, 0, 40)
-RedeemButton.Position = UDim2.new(0.1, 0, 0.4, 0)
-RedeemButton.BackgroundColor3 = Color3.fromRGB(255, 128, 192)
-RedeemButton.Text = "Usar todos os códigos"
-RedeemButton.Font = Enum.Font.GothamBold
-RedeemButton.TextSize = 18
-RedeemButton.TextColor3 = Color3.new(1, 1, 1)
-RedeemButton.ZIndex = 1
-RedeemButton.Parent = Frame
+if success and model then
+    model.Parent = viewport
 
--- Rodapé
-local Footer = Instance.new("TextLabel")
-Footer.Size = UDim2.new(1, 0, 0, 20)
-Footer.Position = UDim2.new(0, 0, 1, -20)
-Footer.BackgroundTransparency = 1
-Footer.Text = "Sdds Nath"
-Footer.Font = Enum.Font.FredokaOne
-Footer.TextColor3 = Color3.new(1, 1, 1)
-Footer.TextSize = 16
-Footer.ZIndex = 1
-Footer.Parent = Frame
-
--- Função de resgatar códigos
-local function redeemAll()
-    for _, code in ipairs(codes) do
-        local success, result = pcall(function()
-            return remote:InvokeServer("RedeemCode", code)
-        end)
-
-        if success then
-            print("[✔] Código resgatado:", code)
-        else
-            warn("[✖] Falha ao resgatar:", code, result)
+    if not model.PrimaryPart then
+        for _, part in pairs(model:GetChildren()) do
+            if part:IsA("BasePart") then
+                model.PrimaryPart = part
+                break
+            end
         end
-
-        wait(0.5)
     end
+
+    if model.PrimaryPart then
+        model:SetPrimaryPartCFrame(CFrame.new(0, 0, 0))
+    end
+
+    -- Cria e posiciona a câmera para o ViewportFrame
+    local camera = Instance.new("Camera")
+    camera.Parent = viewport
+    viewport.CurrentCamera = camera
+    camera.CFrame = CFrame.new(Vector3.new(0, 2, 5), Vector3.new(0, 1, 0))
+else
+    warn("Falha ao carregar o modelo 3D")
 end
 
--- Ação do botão
-RedeemButton.MouseButton1Click:Connect(function()
-    redeemAll()
+-- Botão transparente para resgatar códigos
+local useAllBtn = Instance.new("TextButton")
+useAllBtn.Size = UDim2.new(0, 120, 0, 30)
+useAllBtn.Position = UDim2.new(0.5, -60, 0.85, 0)
+useAllBtn.BackgroundColor3 = Color3.new(1, 1, 1)
+useAllBtn.BackgroundTransparency = 0.7 -- transparente para deixar ver o fundo
+useAllBtn.TextColor3 = Color3.new(0, 0, 0)
+useAllBtn.Font = Enum.Font.SourceSansBold
+useAllBtn.TextSize = 16
+useAllBtn.Text = "Resgatar códigos"
+useAllBtn.Parent = frame
+
+-- Texto com nome embaixo
+local footer = Instance.new("TextLabel")
+footer.Size = UDim2.new(1, 0, 0, 20)
+footer.Position = UDim2.new(0, 0, 1, -25)
+footer.BackgroundTransparency = 1
+footer.TextColor3 = Color3.fromRGB(255, 105, 180)
+footer.Font = Enum.Font.SourceSansBold
+footer.TextSize = 14
+footer.Text = "Sdds Nath"
+footer.Parent = frame
+
+-- Botão fechar UI
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 30, 0, 30)
+closeButton.Position = UDim2.new(1, -35, 0, 5)
+closeButton.BackgroundColor3 = Color3.new(0.8, 0.8, 0.8)
+closeButton.TextColor3 = Color3.new(1, 0, 0)
+closeButton.Text = "X"
+closeButton.Parent = frame
+
+closeButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
+-- Função para usar os códigos
+useAllBtn.MouseButton1Click:Connect(function()
+    for _, code in ipairs(codes) do
+        local success, err = pcall(function()
+            ReplicatedStorage.Remotes.RemoteFunction:InvokeServer("RedeemCode", code)
+        end)
+        if success then
+            print("Código resgatado: "..code)
+        else
+            warn("Falha no código: "..code.." - "..tostring(err))
+        end
+        wait(0.5)
+    end
 end)

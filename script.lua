@@ -5,17 +5,15 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 local codes = {
+    "SORRYFORTHESHUTDOWN",
+    "UPDATEHALF",
+    "TOBITO",
+    "THANKSFORALLTHESUPPORT",
     "THANKSFOR30KLIKES",
     "THANKSFOR20KLIKES",
-    "ILUVAFS",
-    "APOLOGIESFORBUGS",
-    "THANKSFOR10KLIKES",
-    "THANKSFOR5KLIKES",
-    "SORRY4SHUTDOWN",
     "15KCCU",
-    "RELEASE",
     "THANKSFOR20K",
-    "TRAILER",
+    "RELEASE",
 }
 
 local screenGui = Instance.new("ScreenGui")
